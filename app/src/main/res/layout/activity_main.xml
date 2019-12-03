@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorDark"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/id_tTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="GRAVITY GUY"
+        android:layout_marginTop="50dp"
+        android:textColor="@color/colorWhite"
+        android:textSize="30sp" />
+
+    <Button
+        android:id="@+id/id_bStart"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:layout_below="@id/id_tTitle"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@color/colorBlue"
+        android:text="START"
+        android:textColor="@color/colorWhite"
+        android:textSize="24sp" />
+
+    <Button
+        android:id="@+id/id_bSettings"
+        android:layout_width="150dp"
+        android:layout_height="75dp"
+        android:layout_below="@id/id_bStart"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:background="@color/colorBlue"
+        android:text="SETTINGS"
+        android:textColor="@color/colorWhite"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/id_tDifficulty"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/id_bSettings"
+        android:layout_marginTop="50dp"
+        android:text="Difficulty: N/A"
+        android:textColor="@color/colorWhite"
+        android:textSize="30sp" />
+</RelativeLayout>
