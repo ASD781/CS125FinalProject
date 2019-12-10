@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class GameOverActivity extends AppCompatActivity {
+    TextView tScore;
     Button bRestart, bMainMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,9 +18,11 @@ public class GameOverActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game_over);
 
+        tScore = findViewById(R.id.id_tScore);
         bRestart = findViewById(R.id.id_bRestart);
         bMainMenu = findViewById(R.id.id_bMainMenu);
-
+        int score = getIntent().getIntExtra("Score", 0);
+        tScore.setText("Score: " + score);
         bRestart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -36,6 +40,7 @@ public class GameOverActivity extends AppCompatActivity {
                 finish();
             }
         });
+
 
     }
 }

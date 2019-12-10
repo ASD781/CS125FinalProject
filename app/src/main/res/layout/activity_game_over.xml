@@ -7,6 +7,21 @@
     tools:context=".GameOverActivity">
 
     <TextView
+        android:id="@+id/id_tScore"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Score:
+"
+        android:textColor="@color/colorWhite"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.198" />
+
+    <TextView
         android:id="@+id/id_tGameOver"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -14,13 +29,13 @@
         android:text="GAME OVER
 "
         android:textColor="@color/colorWhite"
-        android:textSize="30sp"
+        android:textSize="40sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.497"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.105" />
+        app:layout_constraintVertical_bias="0.107" />
 
     <Button
         android:id="@+id/id_bMainMenu"
@@ -29,7 +44,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="184dp"
         android:background="@color/colorBlue"
-        android:text='"MAIN MENU"'
+        android:text="MAIN MENU"
         android:textColor="@color/colorWhite"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -46,7 +61,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="184dp"
         android:background="@color/colorBlue"
-        android:text='"RESTART"'
+        android:text="RESTART"
         android:textColor="@color/colorWhite"
         android:textSize="24sp"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -145,7 +145,16 @@ public class GameActivity extends AppCompatActivity {
 
                     if (pac.isIntersecting(ghost1) || pac.isIntersecting(ghost2)) {
                         running = false;
-                        gameOverReady = true;
+
+                        Log.d("TAG", "STARTING GAME OVER");
+                        Intent gameOverIntent = new Intent(GameActivity.this, GameOverActivity.class);
+                        Log.d("TAG", "created intent");
+                        gameOverIntent.putExtra("Score", score);
+                        startActivity(gameOverIntent);
+
+                        Log.d("TAG", "started intent");
+                        setVisibility(View.GONE);
+                        Log.d("TAG", "set gone");
 
                     }
 
@@ -157,15 +166,6 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 holder.unlockCanvasAndPost(canvas);
-            }
-            if (gameOverReady) {
-                Log.d("TAG", "STARTING GAME OVER");
-                Intent gameOverIntent = new Intent(GameActivity.this, GameOverActivity.class);
-                Log.d("TAG", "created intent");
-                startActivity(gameOverIntent);
-                Log.d("TAG", "started intent");
-                finish();
-                gameOverReady = false;
             }
         }
 
