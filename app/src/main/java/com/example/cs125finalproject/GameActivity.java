@@ -13,6 +13,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Display;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -72,6 +73,8 @@ public class GameActivity extends AppCompatActivity {
         Display screenDisplay;
         Point sizeOfScreen;
         int screenWidth, screenHeight;
+
+        boolean gameOverReady = false;
 
         int pacSpeed = 30;
         int score, jumpCount, jumpCountMax;
@@ -142,8 +145,8 @@ public class GameActivity extends AppCompatActivity {
 
                     if (pac.isIntersecting(ghost1) || pac.isIntersecting(ghost2)) {
                         running = false;
-                        Intent restartIntent = new Intent();
-                        finish();
+                        gameOverReady = true;
+
                     }
 
                     canvas.drawText("Difficulty: " + diff, 10, 50, diffPaint);
@@ -154,6 +157,15 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 holder.unlockCanvasAndPost(canvas);
+            }
+            if (gameOverReady) {
+                Log.d("TAG", "STARTING GAME OVER");
+                Intent gameOverIntent = new Intent(GameActivity.this, GameOverActivity.class);
+                Log.d("TAG", "created intent");
+                startActivity(gameOverIntent);
+                Log.d("TAG", "started intent");
+                finish();
+                gameOverReady = false;
             }
         }
 
