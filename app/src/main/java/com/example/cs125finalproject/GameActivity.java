@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -20,11 +21,17 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.FrameLayout;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class GameActivity extends AppCompatActivity {
 
     boolean jumping = false;
     boolean up = false;
     String diff = "";
+    Map<String, Integer> diffPeriodMap;
 
     FrameLayout game;
     GameSurface gameSurface;
@@ -35,6 +42,10 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         diff = getIntent().getStringExtra("difficulty");
+        diffPeriodMap = new HashMap<>();
+        diffPeriodMap.put("Easy", 1000);
+        diffPeriodMap.put("Medium", 2000);
+        diffPeriodMap.put("Hard", 3000);
 
         game = new FrameLayout(this);
         gameSurface = new GameSurface(this);
@@ -77,15 +88,22 @@ public class GameActivity extends AppCompatActivity {
         boolean gameOverReady = false;
 
         int pacSpeed = 30;
-        int score, jumpCount, jumpCountMax;
+        int score;
 
         Paint scorePaint, diffPaint;
-        Player pac = new Player(pacSpeed, 0, 0, R.drawable.pacman);
-        Player ghost1 = new Player(0, screenWidth * 2, 0, R.drawable.ghost);;
-        Player ghost2 = new Player(0, screenWidth * 2, 0, R.drawable.ghost);;
+        Bitmap border1, border2;
+        Timer timer;
+        MediaPlayer mediaPlayer;
+
+        Player pac = new Player(pacSpeed, 0, 0, R.drawable.us, "N/A");
+        Player[] ghosts = new Player[] {
+                new Player(0, screenWidth * 2, 0, R.drawable.geoff, "top"),
+                new Player(0, screenWidth * 2, 0, R.drawable.ben, "bot"),
+        };
 
         public GameSurface(Context context) {
             super(context);
+            setVisibility(View.VISIBLE);
 
             holder = getHolder();
             screenDisplay = getWindowManager().getDefaultDisplay();
@@ -101,71 +119,96 @@ public class GameActivity extends AppCompatActivity {
             scorePaint.setTextSize(50);
             scorePaint.setColor(Color.WHITE);
 
-            pac.setY(screenHeight - (pac.getBitmap().getHeight() * 2));
-            setGhost(ghost1, "top");
-            setGhost(ghost2, "bot");
+            border1 = BitmapFactory.decodeResource(getResources(), R.drawable.color);
+            border1 = Bitmap.createScaledBitmap(border1,screenWidth,50,true);
+            border2 = BitmapFactory.decodeResource(getResources(), R.drawable.color);
+            border2 = Bitmap.createScaledBitmap(border1,screenWidth,50,true);
+
+            pac.setY(screenHeight - 250 - pac.getBitmap().getHeight());
+            for (Player p: ghosts) {
+                setGhost(p);
+            }
 
             score = 0;
 
-            jumpCount = 0;
-            jumpCountMax = (50 * pac.getSpeed()) % screenHeight;
+            mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.gamemusic);
+            mediaPlayer.start();
+
+            timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    score++;
+                }
+            }, 0, diffPeriodMap.get(diff));
         }
 
         @Override
         public void run() {
             while (running) {
-                if (!holder.getSurface().isValid())
+                if (!holder.getSurface().isValid()) {
                     continue;
+                }
                 Canvas canvas = holder.lockCanvas();
                 canvas.drawRGB(0, 0, 0);
 
-                score++;
-                if (jumping) {
-                    if (up) {
-                        pac.moveY(pac.getSpeed() * -1);
-                    } else {
-                        pac.moveY(pac.getSpeed());
-                    }
-                    jumpCount += pac.getSpeed();
-                    if (jumpCount == jumpCountMax) {
-                        jumpCount = 0;
-                        jumping = false;
-                    }
-                }
-                if (ghost1 != null && ghost2 != null) {
+                if (!ghostsNull()) {
 
-                    ghost1.moveX(ghost1.getSpeed() * -1);
-                    if (ghost1.getX() <= (screenWidth * -1)) {
-                        setGhost(ghost1, "top");
-                    }
-                    ghost2.moveX(ghost2.getSpeed() * -1);
-                    if (ghost2.getX() <= (screenWidth * -1)) {
-                        setGhost(ghost2, "bot");
+                    if (jumping) {
+                        if (up) {
+                            pac.moveY(pac.getSpeed() * -1);
+                            if (pac.getY() < 250) {
+                                pac.setY(250);
+                                jumping = false;
+                            }
+                        } else {
+                            pac.moveY(pac.getSpeed());
+                            if (pac.getY() > screenHeight - 250 - pac.getBitmap().getHeight()) {
+                                pac.setY(screenHeight - 250 - pac.getBitmap().getHeight());
+                                jumping = false;
+                            }
+                        }
                     }
 
-                    if (pac.isIntersecting(ghost1) || pac.isIntersecting(ghost2)) {
+                    for (Player p: ghosts) {
+                        p.moveX(p.getSpeed() * -1);
+                        if (p.getX() <= (screenWidth * -1)) {
+                            setGhost(p);
+                        }
+                    }
+
+                    if (pac.isIntersecting(ghosts)) {
                         running = false;
-
-                        Log.d("TAG", "STARTING GAME OVER");
-                        Intent gameOverIntent = new Intent(GameActivity.this, GameOverActivity.class);
-                        Log.d("TAG", "created intent");
-                        gameOverIntent.putExtra("Score", score);
-                        startActivity(gameOverIntent);
-
-                        Log.d("TAG", "started intent");
-                        setVisibility(View.GONE);
-                        Log.d("TAG", "set gone");
-
+                        gameOverReady = true;
                     }
 
                     canvas.drawText("Difficulty: " + diff, 10, 50, diffPaint);
                     canvas.drawText("Score: " + score, 10, 100, scorePaint);
+                    canvas.drawBitmap(border1, 0, 200, null);
+                    canvas.drawBitmap(border2, 0, screenHeight - 200, null);
                     canvas.drawBitmap(pac.getBitmap(), pac.getX(), pac.getY(), null);
-                    canvas.drawBitmap(ghost1.getBitmap(), ghost1.getX(), ghost1.getY(), null);
-                    canvas.drawBitmap(ghost2.getBitmap(), ghost2.getX(), ghost2.getY(), null);
+                    for (Player p: ghosts) {
+                        canvas.drawBitmap(p.getBitmap(), p.getX(), p.getY(), null);
+                    }
                 }
 
                 holder.unlockCanvasAndPost(canvas);
+            }
+
+            if (gameOverReady) {
+                Intent gameOverIntent = new Intent(GameActivity.this, GameOverActivity.class);
+                gameOverIntent.putExtra("score", score);
+                startActivity(gameOverIntent);
+                /*runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setVisibility(View.GONE);
+                    }
+                });*/
+                setVisibility(View.GONE);
+                //throw new IndexOutOfBoundsException();
+                running = false;
+                finish();
             }
         }
 
@@ -177,6 +220,8 @@ public class GameActivity extends AppCompatActivity {
 
         public void pause() {
             running = false;
+            mediaPlayer.stop();
+            mediaPlayer.release();
             while (true) {
                 try {
                     gameThread.join();
@@ -187,27 +232,38 @@ public class GameActivity extends AppCompatActivity {
             }
         }
 
-        public void setGhost(Player p, String ori) {
-            p.setX(screenWidth);
-            if (ori.equals("top")) {
-                p.setY(screenHeight - (p.getBitmap().getHeight() * 2));
+        public void setGhost(Player p) {
+            p.setX(screenWidth * 2);
+            if (p.getOri().equals("top")) {
+                p.setY(250);
             } else {
-                p.setY(p.getBitmap().getHeight() * 2);
+                p.setY(screenHeight - 250 - p.getBitmap().getHeight());
             }
             p.setSpeed(pacSpeed + (int) (Math.random() * 25) - 25);
+        }
+
+        public boolean ghostsNull() {
+            for (Player p: ghosts) {
+                if (p == null) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 
     public class Player {
         int speed, x, y;
         Bitmap bitmap;
+        String ori;
 
-        public Player(int nSpeed, int nX, int nY, int id) {
+        public Player(int nSpeed, int nX, int nY, int id, String nOri) {
             speed = nSpeed;
             x = nX;
             y = nY;
             bitmap = BitmapFactory.decodeResource(getResources(), id);
             bitmap = Bitmap.createScaledBitmap(bitmap,100,100,true);
+            ori = nOri;
         }
 
         public int getSpeed() {
@@ -246,12 +302,35 @@ public class GameActivity extends AppCompatActivity {
             return bitmap;
         }
 
+        public void setOri(String nOri) {
+            ori = nOri;
+        }
+
+        public String getOri() {
+            return ori;
+        }
+
         public boolean isIntersecting(Player p) {
             Rect r1= new Rect(x, y, x + bitmap.getWidth(), y + bitmap.getHeight());
             Rect r2= new Rect(p.getX(), p.getY(),
                     p.getX() + p.getBitmap().getWidth(),
                     p.getY() + p.getBitmap().getHeight());
             return r1.intersect(r2);
+        }
+
+        public boolean isIntersecting(Player[] pArr) {
+            boolean intersecting = false;
+            Rect r1= new Rect(x, y, x + bitmap.getWidth(), y + bitmap.getHeight());
+            for (Player p: pArr) {
+                Rect r2 = new Rect(p.getX(), p.getY(),
+                        p.getX() + p.getBitmap().getWidth(),
+                        p.getY() + p.getBitmap().getHeight());
+                if (r1.intersect(r2)) {
+                    intersecting = true;
+                    break;
+                }
+            }
+            return intersecting;
         }
     }
 }

@@ -21,7 +21,7 @@ public class GameOverActivity extends AppCompatActivity {
         tScore = findViewById(R.id.id_tScore);
         bRestart = findViewById(R.id.id_bRestart);
         bMainMenu = findViewById(R.id.id_bMainMenu);
-        int score = getIntent().getIntExtra("Score", 0);
+        int score = getIntent().getIntExtra("score", 0);
         tScore.setText("Score: " + score);
         bRestart.setOnClickListener(new View.OnClickListener() {
             @Override
